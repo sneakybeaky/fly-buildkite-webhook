@@ -2,7 +2,9 @@
 package main
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"log/slog"
@@ -74,7 +76,7 @@ func webhookHandler() http.Handler {
 			}
 		}
 
-		data, err := io.ReadAll(r.Body)
+		body, err := io.ReadAll(r.Body)
 
 		if err != nil {
 			http.Error(w, err.Error(), 500)
@@ -82,7 +84,14 @@ func webhookHandler() http.Handler {
 			return
 		}
 
-		slog.Info("Body", "payload", string(data))
+		var prettyJSON bytes.Buffer
+		err = json.Indent(&prettyJSON, body, "", "\t")
+		if err != nil {
+			http.Error(w, err.Error(), 500)
+			return
+		}
+
+		slog.Info("Body", "payload", prettyJSON.String())
 	})
 }
 
