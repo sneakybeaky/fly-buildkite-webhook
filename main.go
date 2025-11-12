@@ -2,24 +2,20 @@
 package main
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
-	"io"
 	"log/slog"
 	"net/http"
 	"os"
 	"time"
 
+	"github.com/buildkite/go-buildkite/v4"
 	"github.com/sethvargo/go-envconfig"
 )
 
 type Config struct {
-	Port string `env:"PORT, default=8080"`
-	//Dataset   string `env:"BQ_DATASET_NAME, required"`
-	//Table     string `env:"BQ_TABLE_NAME, required"`
-	//ProjectId string `env:"PROJECT_ID, required"`
+	Port  string `env:"PORT, default=8080"`
+	Token []byte `env:"BUILDKITE_TOKEN, required"`
 }
 
 func logRequest(next http.Handler) http.Handler {
@@ -67,31 +63,25 @@ func headersHandler() http.Handler {
 	})
 }
 
-func webhookHandler() http.Handler {
+func webhookHandler(secretKey []byte) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-		for name, headers := range r.Header {
-			for _, h := range headers {
-				slog.Info("Header", "name", name, "value", h)
-			}
-		}
-
-		body, err := io.ReadAll(r.Body)
-
+		payload, err := buildkite.ValidatePayload(r, secretKey)
 		if err != nil {
-			http.Error(w, err.Error(), 500)
-			slog.Error("webhookHandler: failed to read webhook body", slog.String("error", err.Error()))
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			slog.Error("Invalid payload", slog.String("error", err.Error()))
 			return
 		}
 
-		var prettyJSON bytes.Buffer
-		err = json.Indent(&prettyJSON, body, "", "\t")
+		event, err := buildkite.ParseWebHook(buildkite.WebHookType(r), payload)
+
 		if err != nil {
-			http.Error(w, err.Error(), 500)
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			slog.Error("Unable to parse webhook", slog.String("error", err.Error()))
 			return
 		}
 
-		slog.Info("Body", "payload", prettyJSON.String())
+		slog.Info("Got event from webhook", "event", event)
 	})
 }
 
@@ -113,7 +103,7 @@ func main() {
 	mux.Handle("GET /headers", logRequest(timeRequest(headersHandler())))
 
 	// probe endpoints - don't log these
-	mux.Handle("POST /", webhookHandler())
+	mux.Handle("POST /", webhookHandler(cfg.Token))
 	mux.Handle("GET /health", messageHandler("OK"))
 
 	err := http.ListenAndServe(":"+cfg.Port, mux)
