@@ -2,7 +2,13 @@
   "$schema": "https://raw.githubusercontent.com/jetify-com/devbox/0.16.0/.schema/devbox.schema.json",
   "packages": [
     "flyctl@latest",
-    "go@latest"
+    "go@latest",
+    "go-task@latest",
+    "golangci-lint@latest",
+    "golines@latest",
+    "ko@latest",
+    "govulncheck@latest",
+    "go-tools@latest"
   ],
   "shell": {
     "init_hook": [

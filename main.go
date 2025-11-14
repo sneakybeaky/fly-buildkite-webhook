@@ -48,7 +48,7 @@ func timeRequest(next http.Handler) http.Handler {
 
 func messageHandler(message string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte(message))
+		_, _ = w.Write([]byte(message))
 	})
 }
 
@@ -57,7 +57,7 @@ func headersHandler() http.Handler {
 
 		for name, headers := range r.Header {
 			for _, h := range headers {
-				fmt.Fprintf(w, "%v: %v\n", name, h)
+				_, _ = fmt.Fprintf(w, "%v: %v\n", name, h)
 			}
 		}
 	})

@@ -1,0 +1,34 @@
+# https://taskfile.dev
+
+version: '3'
+
+vars:
+  GREETING: Hello, World!
+
+dotenv: ['.env']
+
+tasks:
+
+  lint:
+    desc: Runs the linters and formatters
+    cmds:
+      - golangci-lint run --fix .
+      - golines --no-reformat-tags -w .
+      - golangci-lint run
+
+  audit:
+    desc: Checks for security issues
+    cmds:
+      - go vet ./...
+      - staticcheck ./...
+      - govulncheck
+
+
+  deploy:
+    desc: Build & deploy to fly
+    deps: [lint,audit]
+    cmds:
+      - fly deploy -a $FLY_APP_NAME  -i {{.IMAGE_COORDS}}
+    vars:
+      IMAGE_COORDS:
+        sh: KO_DOCKER_REPO=registry.fly.io/$FLY_APP_NAME  ko build . --bare --platform=linux/amd64
