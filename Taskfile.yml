@@ -3,7 +3,7 @@
 version: '3'
 
 vars:
-  GREETING: Hello, World!
+  IMAGE_FILE: image.txt
 
 dotenv: ['.env']
 
@@ -24,11 +24,29 @@ tasks:
       - govulncheck
 
 
-  deploy:
-    desc: Build & deploy to fly
+  build:
+    desc: Build & publish image
     deps: [lint,audit]
     cmds:
-      - fly deploy -a $FLY_APP_NAME  -i {{.IMAGE_COORDS}}
+      - KO_DOCKER_REPO=registry.fly.io/$FLY_APP_NAME  ko build . --bare --platform=linux/amd64 > {{.IMAGE_FILE}}
+    sources:
+      - '**/*.go'
+      - 'go.mod'
+    generates:
+      - '{{.IMAGE_FILE}}'
+
+  deploy:
+    desc: Deploy to fly
+    deps: [build]
+    cmds:
+      - fly deploy -a $FLY_APP_NAME  -i {{.IMAGE}}
+    sources:
+      - '{{.IMAGE_FILE}}'
     vars:
-      IMAGE_COORDS:
-        sh: KO_DOCKER_REPO=registry.fly.io/$FLY_APP_NAME  ko build . --bare --platform=linux/amd64
+      IMAGE:
+        sh: cat {{.IMAGE_FILE}}
+
+  clean:
+    desc: Clean every generated file
+    cmds:
+      - rm -f {{.IMAGE_FILE}}
