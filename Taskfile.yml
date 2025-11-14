@@ -31,7 +31,7 @@ tasks:
     desc: Build & publish image
     deps: [lint,audit]
     cmds:
-      - KO_DOCKER_REPO=registry.fly.io/$FLY_APP_NAME  ko build . --bare --platform=linux/amd64 > {{.IMAGE_FILE}}
+      - KO_DOCKER_REPO=registry.fly.io/$FLY_APP_NAME  ko build ./cmd/ingest --bare --platform=linux/amd64 > {{.IMAGE_FILE}}
     sources:
       - '**/*.go'
       - 'go.mod'
