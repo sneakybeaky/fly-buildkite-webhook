@@ -43,12 +43,9 @@ tasks:
     desc: Deploy to fly
     deps: [build]
     cmds:
-      - fly deploy -a $FLY_APP_NAME  -i {{.IMAGE}}
+      - fly deploy -a $FLY_APP_NAME  -i $(cat {{.IMAGE_FILE}})
     sources:
       - '{{.IMAGE_FILE}}'
-    vars:
-      IMAGE:
-        sh: cat {{.IMAGE_FILE}}
 
   clean:
     desc: Clean every generated file
