@@ -8,8 +8,7 @@ require (
 )
 
 require (
-	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
-	github.com/google/go-cmp v0.7.0 // indirect
-	github.com/google/go-querystring v1.1.0 // indirect
-	golang.org/x/net v0.47.0 // indirect
+	github.com/cenkalti/backoff v1.1.1-0.20171020064038-309aa717adbf // indirect
+	github.com/google/go-querystring v1.0.0 // indirect
+	golang.org/x/net v0.38.0 // indirect
 )

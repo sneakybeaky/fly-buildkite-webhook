@@ -13,10 +13,10 @@ tasks:
     desc: Runs the linters and formatters
     cmds:
       - golangci-lint run --fix ./...
-      - golines --no-reformat-tags -w .
       - golangci-lint run ./...
     sources:
       - '**/*.go'
+      - 'go.mod'
 
   audit:
     desc: Checks for security issues
@@ -26,6 +26,7 @@ tasks:
       - govulncheck
     sources:
       - '**/*.go'
+      - 'go.mod'
 
   build:
     desc: Build & publish image

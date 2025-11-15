@@ -5,7 +5,6 @@
     "go@latest",
     "go-task@latest",
     "golangci-lint@latest",
-    "golines@latest",
     "ko@latest",
     "govulncheck@latest",
     "go-tools@latest"
