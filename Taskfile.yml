@@ -51,3 +51,8 @@ tasks:
     desc: Clean every generated file
     cmds:
       - rm -f {{.IMAGE_FILE}}
+
+  tail-logs:
+    desc: Tail app logs
+    cmds:
+      - fly logs -a $FLY_APP_NAME

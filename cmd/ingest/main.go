@@ -81,7 +81,25 @@ func webhookHandler(secretKey []byte) http.Handler {
 			return
 		}
 
-		slog.Info("Got event from webhook", "event", event)
+		switch e := event.(type) {
+
+		case *buildkite.BuildFinishedEvent:
+
+			slog.Info("Build finished",
+				slog.String("build_id", e.Build.ID),
+				slog.Bool("pull request ?", e.Build.PullRequest == nil),
+				slog.String("branch", e.Build.Branch),
+				slog.String("state", e.Build.State),
+				slog.Time("started at", e.Build.StartedAt.Time),
+				slog.Time("finished at", e.Build.FinishedAt.Time),
+			)
+		case *buildkite.BuildEvent:
+			slog.Info("Build event we don't care about")
+
+		default:
+			slog.Info("Event type we don't care about")
+		}
+
 	})
 }
 
