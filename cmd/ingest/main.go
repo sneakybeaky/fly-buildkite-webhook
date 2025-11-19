@@ -119,9 +119,9 @@ func main() {
 
 	mux.Handle("GET /hello", logRequest(timeRequest(messageHandler("Hello world!"))))
 	mux.Handle("GET /headers", logRequest(timeRequest(headersHandler())))
+	mux.Handle("POST /", logRequest(timeRequest(webhookHandler(cfg.Token))))
 
 	// probe endpoints - don't log these
-	mux.Handle("POST /", webhookHandler(cfg.Token))
 	mux.Handle("GET /health", messageHandler("OK"))
 
 	err := http.ListenAndServe(":"+cfg.Port, mux)
